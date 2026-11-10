@@ -1,0 +1,23 @@
+name: otp-sweep
+on:
+  workflow_dispatch:
+    inputs:
+      start: {required: true}
+      end: {required: true}
+      workers: {default: "120"}
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests
+      - env:
+          UID: 583d0da0-2154-4070-8c71-50cd2152c5ba
+          START: ${{ inputs.start }}
+          END: ${{ inputs.end }}
+          WORKERS: ${{ inputs.workers }}
+        run: python sweep.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: hit, path: HIT.txt}
