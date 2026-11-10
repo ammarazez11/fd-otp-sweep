@@ -3,7 +3,7 @@ import requests
 URL='https://youraifrontdesk.com/api/auth/verify-reset-otp'
 UID=os.environ['UID']; START=int(os.environ['START']); END=int(os.environ['END']); W=int(os.environ.get('WORKERS','120'))
 STOP=threading.Event(); L=threading.Lock(); S={'next':START,'tried':0}
-SHARD=int(os.environ.get('SHARD','0')); NSH=int(os.environ.get('NSHARDS','1'))
+SHARD=int(os.environ.get('SHARD','0')); NSH=int(os.environ.get('NSHARDS') or 20)
 def w():
     s=requests.Session()
     while not STOP.is_set():
