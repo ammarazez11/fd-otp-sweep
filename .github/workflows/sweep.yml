@@ -27,4 +27,6 @@ jobs:
         run: python sweep.py
       - uses: actions/upload-artifact@v4
         if: always()
-        with: {name: hit-${{ matrix.shard }}, path: HIT.txt}
+        with:
+          name: hit-${{ matrix.shard }}
+          path: HIT.txt
