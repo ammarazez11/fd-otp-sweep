@@ -4,9 +4,14 @@ on:
     inputs:
       start: {required: true}
       end: {required: true}
-      workers: {default: "120"}
+      workers: {default: "12"}
+      nshards: {default: "20"}
 jobs:
   sweep:
+    strategy:
+      max-parallel: 20
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:
@@ -17,7 +22,9 @@ jobs:
           START: ${{ inputs.start }}
           END: ${{ inputs.end }}
           WORKERS: ${{ inputs.workers }}
+          SHARD: ${{ matrix.shard }}
+          NSHARDS: ${{ inputs.nshards }}
         run: python sweep.py
       - uses: actions/upload-artifact@v4
         if: always()
-        with: {name: hit, path: HIT.txt}
+        with: {name: hit-${{ matrix.shard }}, path: HIT.txt}
