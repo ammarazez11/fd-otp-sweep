@@ -1,0 +1,37 @@
+name: autoresume
+on: workflow_dispatch
+jobs:
+  wait:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests
+      - name: wait for auth api
+        run: |
+          for i in $(seq 1 300); do
+            c=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST -H 'Content-Type: application/json' -d '{"email_or_username":"towerradiology","password":"x"}' https://youraifrontdesk.com/api/auth/login || true)
+            echo "probe $i -> $c"
+            if [ "$c" = "401" ] || [ "$c" = "200" ]; then echo API_UP; exit 0; fi
+            sleep 50
+          done
+          echo API_STILL_DOWN
+      - name: sweep
+        env:
+          UID: 583d0da0-2154-4070-8c71-50cd2152c5ba
+          START: 934600
+          END: 999999
+          WORKERS: 60
+        run: python sweep.py
+      - name: sweep wrap
+        env:
+          UID: 583d0da0-2154-4070-8c71-50cd2152c5ba
+          START: 0
+          END: 934599
+          WORKERS: 60
+        run: python sweep.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: autoresume-hit
+          path: HIT.txt
